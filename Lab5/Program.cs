@@ -311,17 +311,15 @@ public class Program
     }
     static void SortArrayPart(int[] array, int startIndex)
     {
-        if (startIndex >= array.Length) return;
-        int[] part = new int[array.Length - startIndex];
-        for (int i = 0; i < part.Length; i++)
+        int maxIndex = 0;
+        for (int i = 1; i < array.Length; i++)
         {
-            part[i] = array[startIndex + i];
+            if (array[i] > array[maxIndex])
+            {
+                maxIndex = i;
+            }
         }
-        Array.Sort(part);
-        for (int i = 0; i < part.Length; i++)
-        {
-            array[startIndex + i] = part[i];
-        }
+        SortArrayPart(array, maxIndex + 1);
     }
     public void Task_2_8(int[] A, int[] B)
     {
@@ -375,32 +373,32 @@ public class Program
     {
         // code here
         if (matrix.GetLength(0) != matrix.GetLength(1) || matrix.GetLength(0) <= 0) return;
-        int maxI = 0, maxJ = 0;
-        int maxI2 = 0, maxJ2 = 0;
+        int maxi1 = 0, maxj1 = 0;
+        int maxi2 = 0, maxj2 = 0;
         for (int i = 0; i < matrix.GetLength(0); i++)
         {
             for (int j = 0; j < matrix.GetLength(1); j++)
             {
-                if (j <= i && matrix[i, j] > matrix[maxI, maxJ])
+                if (j <= i && matrix[i, j] > matrix[maxi1, maxj1])
                 {
-                    maxI = i;
-                    maxJ = j;
+                    maxi1 = i;
+                    maxj1 = j;
                 }
-                else if (j > i && matrix[i, j] > matrix[maxI2, maxJ2])
+                else if (j > i && matrix[i, j] > matrix[maxi2, maxj2])
                 {
-                    maxI2 = i;
-                    maxJ2 = j;
+                    maxi2 = i;
+                    maxj2 = j;
                 }
             }
         }
-        if (maxJ == maxJ2)
+        if (maxj1 == maxj2)
         {
-            matrix = RemoveColumn(matrix, maxJ);
+            matrix = RemoveColumn(matrix, maxj1);
         }
         else
         {
-            int firstColumn = Math.Max(maxJ, maxJ2);
-            int secondColumn = Math.Min(maxJ, maxJ2);
+            int firstColumn = Math.Max(maxj1, maxj2);
+            int secondColumn = Math.Min(maxj1, maxj2);
             matrix = RemoveColumn(matrix, firstColumn);
             matrix = RemoveColumn(matrix, secondColumn);
         }
@@ -645,90 +643,33 @@ public class Program
 
         // end
     }
-    //public int [,] RemoveColumnWithoutZero(int[,]matrix)
-    //{
-    //    int rows = matrix.GetLength(0);
-    //    int cols = matrix.GetLength(1);
-    //    int count = 0;
-    //    for (int j = 0; j < cols; j++)
-    //    {
-    //        bool zero = false;
-    //        for (int i = 0; i < rows; i++)
-    //        {
-    //            if (matrix[i, j] == 0)
-    //            {
-    //                zero = true;
-    //                break;
-    //            }
-    //        }
-    //        if (!zero)
-    //        {
-    //            AbandonedMutexExc
-    //            count--;
-    //        }
-    //    }
-    //    int[,] newMatrix = new int[rows, count];
-    //    int index = 0;
-    //    for (int j = 0; j < cols; j++)
-    //    {
-    //        bool zero = false;
-    //        for(int i = 0; i < rows; i++)
-    //        {
-    //            if (matrix[i, j] == 0)
-    //            {
-    //                zero = true;
-    //                break;
-    //            }      
-    //        }   
-    //        if (zero)
-    //        {
-    //            for (int i = 0; i < rows; i++)
-    //            {
-    //                newMatrix[i, index] = matrix[i, j];
-    //            }
-    //            index++;
-    //        }
-    //    }
-    //    return newMatrix;
-    //}
+    public void Removing (ref int[,] matrix)
+    {
+        for (int j = 0; j < matrix.GetLength(1); j++)
+        {
+            bool zero = false;
+            for (int i = 0; i < matrix.GetLength(0); i++)
+            {
+                if (matrix[i, j] == 0)
+                {
+                    zero = true;
+                    break;
+                }
+            }
+            if (!zero)
+            {
+                matrix = RemoveColumn(matrix, j);
+                j--;
+            }
+        }
+    }
     public void Task_2_20(ref int[,] A, ref int[,] B)
     {
         // code here
-        //if (CheckingMatrix(A) == 0 || CheckingMatrix(B) == 0) return;
-        for (int j = 0; j < A.GetLength(1); j++)
-        {
-            bool zero = false;
-            for (int i = 0; i < A.GetLength(0); i++)
-            {
-                if (A[i, j] == 0)
-                {
-                    zero = true;
-                    break;
-                }
-            }
-            if (!zero)
-            {
-                A = RemoveColumn(A, j);
-                j--;
-            }
-        }
-        for (int j = 0; j < B.GetLength(1); j++)
-        {
-            bool zero = false;
-            for (int i = 0; i < B.GetLength(0); i++)
-            {
-                if (B[i, j] == 0)
-                {
-                    zero = true;
-                    break;
-                }
-            }
-            if (!zero)
-            {
-                B = RemoveColumn(B, j);
-                j--;
-            }
-        }
+        if (CheckingMatrix(A) == 0 || CheckingMatrix(B) == 0) return;
+        Removing(ref A);
+        Removing(ref B);
+        
         // use RemoveColumn(matrix, columnIndex); from 2_10
 
         // end
@@ -930,99 +871,71 @@ public class Program
 
         // end
     }
+    public int[,] FindSequences(int[] array)
+    {
+        int count = 0;
+        for (int i = 0; i < array.Length; i++)
+        {
+            for (int j = i + 1; j < array.Length; j++)
+            {
+                int sequence = FindSequence(array, i, j);
+                if (sequence != 0) count++;
+            }
+        }
+        int[,] result = new int[count, 2];
+        count = 0;
+        for (int i = 0; i < array.Length; i++)
+        {
+            for (int j = i + 1; j < array.Length; j++)
+            {
+                int sequence = FindSequence(array, i, j);
+                if (sequence != 0)
+                {
+                    result[count, 0] = i;
+                    result[count, 1] = j;
+                    count++;
+                }
+            }
+        }
+        return result;
+    }
     public void Task_2_28b(int[] first, int[] second, ref int[,] answerFirst, ref int[,] answerSecond)
     {
         // code here
-        int count = 0;
-        for (int i = 0; i < first.Length; i++)
-        {
-            for (int j = i + 1; j < first.Length; j++)
-            {
-                int sequence = FindSequence(first, i, j);
-                if (sequence != 0) count++;
-            }
-        }
-        answerFirst = new int[count, 2];
-        count = 0;
-        for (int i = 0; i < first.Length; i++)
-        {
-            for (int j = i + 1; j < first.Length; j++)
-            {
-                int sequence = FindSequence(first, i, j);
-                if (sequence != 0)
-                {
-                    answerFirst[count, 0] = i;
-                    answerFirst[count, 1] = j;
-                    count++;
-                }
-            }
-        }
-        count = 0;
-        for (int i = 0; i < second.Length; i++)
-        {
-            for( int j = i + 1; j < second.Length; j++)
-            {
-                int sequence = FindSequence(second, i, j);
-                if (sequence != 0) count++;
-            }
-        }
-        answerSecond = new int[count, 2];
-        count = 0;
-        for (int i = 0; i < second.Length; i++)
-        {
-            for (int j = i + 1; j < second.Length; j++)
-            {
-                int sequence = FindSequence(second, i, j);
-                if (sequence != 0)
-                {
-                    answerSecond[count, 0] = i;
-                    answerSecond[count, 1] = j;
-                    count++;
-                }
-            }
-        }
+        FindSequences(first);
+        FindSequences(second);
+       
         // use FindSequence(array, A, B); from Task_2_28a or entirely Task_2_28a
         // A and B - start and end indexes of elements from array for search
 
         // end
     }
+    public int[] FindLongestSequence(int[] array)
+    {
+        {
+            int start = 0;
+            int end = 0;
 
+            for (int i = 0; i < array.Length; i++)
+            {
+                for (int j = i + 1; j < array.Length; j++)
+                {
+                    if (FindSequence(array, i, j) != 0 && (end - start) < (j - i))
+                    {
+                        start = i;
+                        end = j;
+                    }
+                }
+            }
+
+            return new int[] { start, end };
+        }
+    }
     public void Task_2_28c(int[] first, int[] second, ref int[] answerFirst, ref int[] answerSecond)
     {
         // code here
-        int startA = 0;
-        int endA = 0;
-        for(int i = 0; i < first.Length; i++)
-        {
-            for (int j = i + 1; j < first.Length; j++)
-            {
-                if (FindSequence(first, i, j) != 0 && (endA - startA) < (j - i))
-                {
-                    startA = i;
-                    endA = j;
-                }
-            }
-        }
-        answerFirst = new int[2];
-        answerFirst[0] = startA;
-        answerFirst[1] = endA;
-
-        int startB = 0;
-        int endB = 0;
-        for (int i = 0; i < second.Length; i++)
-        {
-            for (int j = i + 1; j < second.Length; j++)
-            {
-                if (FindSequence(second, i, j) != 0 && (endB - startB) < (j - i))
-                {
-                    startB = i;
-                    endB = j;
-                }
-            }
-        }
-        answerSecond = new int[2];
-        answerSecond[0] = startB;
-        answerSecond[1] = endB;
+        FindLongestSequence(first);
+        FindLongestSequence(second);
         // use FindSequence(array, A, B); from Task_2_28a or entirely Task_2_28a or Task_2_28b
         // A and B - start and end indexes of elements from array for search
 
